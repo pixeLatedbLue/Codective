@@ -6,7 +6,7 @@ import type { AnalysisResult } from '@/lib/analyzer';
 export interface HistoryEntry {
   id: string;
   timestamp: number;
-  label: string;         // first line of code or repo name
+  label: string;
   language: string;
   qualityScore: number;
   bugRisk: 'Low' | 'Medium' | 'High';
@@ -18,27 +18,18 @@ const MAX_ENTRIES = 10;
 
 function load(): HistoryEntry[] {
   if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(sessionStorage.getItem(KEY) || '[]');
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(sessionStorage.getItem(KEY) || '[]'); }
+  catch { return []; }
 }
 
 function save(entries: HistoryEntry[]) {
   if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(entries));
-  } catch {}
+  try { sessionStorage.setItem(KEY, JSON.stringify(entries)); } catch {}
 }
 
 export function useHistory() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
-
-  useEffect(() => {
-    setEntries(load());
-  }, []);
-
+  useEffect(() => { setEntries(load()); }, []);
   const add = useCallback((result: AnalysisResult, label: string) => {
     const entry: HistoryEntry = {
       id: Math.random().toString(36).slice(2),
@@ -56,11 +47,6 @@ export function useHistory() {
     });
     return entry.id;
   }, []);
-
-  const clear = useCallback(() => {
-    setEntries([]);
-    save([]);
-  }, []);
-
+  const clear = useCallback(() => { setEntries([]); save([]); }, []);
   return { entries, add, clear };
 }
